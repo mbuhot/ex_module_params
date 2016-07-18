@@ -1,2 +1,0 @@
-defmodule Modparam do
-end
