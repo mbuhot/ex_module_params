@@ -1,13 +1,12 @@
-defmodule ParameterizedModuleTest do
+defmodule ModuleParamsTest do
   use ExUnit.Case
-  doctest ParameterizedModule
+  doctest ModuleParams
 
   test "Can instantiate with substitued alias" do
     defmodule Elixir.FakeIO do
       def puts(x), do: send(self, x)
     end
-
-    use ModA, O: FakeIO, as: TestModA
+    use ModA, O: FIO, as: TestModA
     TestModA.launch_missiles("HELLO")
     assert_received("hello")
   end

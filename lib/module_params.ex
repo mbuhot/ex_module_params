@@ -1,11 +1,11 @@
-defmodule ParameterizedModule do
+defmodule ModuleParams do
 
   @doc """
   Makes defmodule/3 available for module definition.
   """
   defmacro __using__(_) do
     quote do
-      import ParameterizedModule, only: [defmodule: 3]
+      import ModuleParams, only: [defmodule: 3]
     end
   end
 
@@ -68,8 +68,8 @@ defmodule ParameterizedModule do
         :defmacro, [], [
           {:__using__, [], [{:opts, [], Elixir}]}, [
             do: {
-              {:., [], [{:__aliases__, [alias: false], [:ParameterizedModule]}, :using]}, [],
-              [name, {:quote, [], [body]}, env, defaults, {:opts, [], Elixir}]
+              {:., [], [{:__aliases__, [alias: false], [:ModuleParams]}, :using]}, [],
+              [name, {:quote, [], [body]}, env, defaults, {:opts, [], Elixir}, {:__CALLER__, [], Elixir}]
             }
           ]
         ]
@@ -77,17 +77,18 @@ defmodule ParameterizedModule do
     ]
   end
 
-  def using(name, body, env, defaults, opts) do
-    args = resolve_args(defaults, opts)
+  def using(name, body, env, defaults, opts, caller_env) do
+    args = resolve_args(defaults, opts, caller_env.aliases)
     mangled_name = new(name, body, env, args)
     make_alias(mangled_name, alias_name(name, opts))
   end
 
-  defp resolve_args(defaults, opts) do
+  defp resolve_args(defaults, opts, aliases) do
     opts
+    |> Enum.map(fn {k,v} -> {k, concat_aliases(v)} end)
+    |> Enum.map(fn {k,v} -> {k, aliases[v] || v} end)
     |> Keyword.drop([:as])
     |> Keyword.merge(defaults, fn (_k, v1, _v2) -> v1 end)
-    |> Enum.map(fn {k,v} -> {k, concat_aliases(v)} end)
   end
 
   defp alias_name(name, opts) do

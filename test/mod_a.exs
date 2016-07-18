@@ -1,4 +1,4 @@
-use ParameterizedModule
+use ModuleParams
 
 defmodule ModA, S: String, O: IO do
   def launch_missiles(x) do
